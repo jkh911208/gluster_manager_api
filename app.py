@@ -1,10 +1,5 @@
 from flask import Flask
-from db.Database import Database
-import config
 import sys
-
-# connect to Mongo DB
-config.db = Database(config.mongodb_uri, config.database_name)
 
 app = Flask(__name__)
 

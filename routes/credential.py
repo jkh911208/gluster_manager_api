@@ -1,10 +1,10 @@
-from config import db
+
 import logging
 from controllers.Credential import Credential
 from flask import Blueprint, request, jsonify
 
 credential = Blueprint("credential", __name__)
-Credential = Credential(db)
+Credential = Credential()
 
 @credential.route("/", methods=["GET"])
 def get_all_credentials():

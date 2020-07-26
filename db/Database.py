@@ -18,6 +18,12 @@ class Database(object):
         self.client = pymongo.MongoClient(mongo_uri)
         self.db = self.client[db_name]
         self.collection = None
+    
+    def __del__(self):
+        try:
+            self.client.close()
+        except Exception:
+            pass
 
     def set_collection(self, collection: str):
         """
@@ -32,7 +38,7 @@ class Database(object):
             raise TypeError("Collection need to be string type")
         self.collection = self.db[collection]
 
-    def insert(self, payload: dict) -> bool:
+    def insert(self, payload: dict):
         """
             operate insert to mongodb
 
@@ -47,11 +53,10 @@ class Database(object):
 
         try:
             self.collection.insert_one(payload)
-            return True
         except Exception as err:
             logging.exception(
                 "Not able to insert data : {payload} to collection : {collection} with {msg}".format(payload=payload, collection=self.collection, msg=err.__str__()))
-            return False
+            raise
 
     def find_by_id(self, id: Union[str, ObjectId]) -> dict:
         """
@@ -75,7 +80,7 @@ class Database(object):
         except Exception as err:
             logging.exception(
                 "Not able to find using id : {id} from collection : {collection} with {msg}".format(id=id.toString(), collection=self.collection, msg=err.__str__()))
-            return None
+            raise
 
     def find_all(self, filter: dict=None) -> list:
         """
@@ -97,7 +102,7 @@ class Database(object):
         except Exception as err:
             logging.exception(
                 "Not able to find_all from collection : {collection} with {msg}".format(collection=self.collection, msg=err.__str__()))
-            return None
+            raise
 
     def find(self, query: dict) -> dict:
         """
@@ -118,4 +123,20 @@ class Database(object):
         except Exception as err:
             logging.exception(
                 "Not able to find by query : {query} from collection : {collection} with {msg}".format(query=query, collection=self.collection, msg=err.__str__()))
-            return None
+            raise
+
+    def update(self, id: Union[str, ObjectId], payload: dict) -> bool:
+        if not isinstance(id, (str, ObjectId)):
+            raise TypeError("id need to be str or ObjectId type")
+
+        if isinstance(id, str):
+            id = ObjectId(id)
+
+        if not isinstance(payload, dict):
+            raise TypeError("payload need to be dict type, get type {}".format(type(payload)))
+        
+        try:
+            self.collection.update_one({"_id": id}, {"$set": payload})
+        except Exception as err:
+            logging.exception("Not able to update _id : {id}, in collection : {collection} with {msg}".format(id=id, collection=self.collection, msg=err.__str__()))
+            raise
