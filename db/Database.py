@@ -1,6 +1,7 @@
 import pymongo
 from bson.objectid import ObjectId
 import logging
+from typing import Union
 
 
 class Database(object):
@@ -42,7 +43,7 @@ class Database(object):
 
         """
         if not isinstance(payload, dict):
-            raise TypeError("payload need to be dict type")
+            raise TypeError("payload need to be dict type, get type {}".format(type(payload)))
 
         try:
             self.collection.insert_one(payload)
@@ -52,7 +53,7 @@ class Database(object):
                 "Not able to insert data : {payload} to collection : {collection} with {msg}".format(payload=payload, collection=self.collection, msg=err.__str__()))
             return False
 
-    def find_by_id(self, id: [str, ObjectId]) -> dict:
+    def find_by_id(self, id: Union[str, ObjectId]) -> dict:
         """
             find one document using id
 
@@ -76,7 +77,7 @@ class Database(object):
                 "Not able to find using id : {id} from collection : {collection} with {msg}".format(id=id.toString(), collection=self.collection, msg=err.__str__()))
             return None
 
-    def find_all(self) -> list:
+    def find_all(self, filter: dict=None) -> list:
         """
             find all document from collection
 
@@ -87,7 +88,12 @@ class Database(object):
                 list -> list of documents
         """
         try:
-            return list(self.collection.find())
+            if filter is None:
+                return list(self.collection.find())
+            else:
+                if not isinstance(filter, dict):
+                    raise TypeError("filter need to be dict type, received type of : {}".format(type(dict)))
+                return list(self.collection.find({}, filter))
         except Exception as err:
             logging.exception(
                 "Not able to find_all from collection : {collection} with {msg}".format(collection=self.collection, msg=err.__str__()))
