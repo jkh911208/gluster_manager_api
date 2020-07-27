@@ -1,6 +1,5 @@
 import config
 from db.Database import Database
-from util.Encryption import Encryption
 from controllers.Cryptography import Crypto
 
 class Credential(object):

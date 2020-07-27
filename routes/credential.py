@@ -1,15 +1,14 @@
-
 import logging
 from controllers.Credential import Credential
 from flask import Blueprint, request, jsonify
 
 credential = Blueprint("credential", __name__)
-Credential = Credential()
+credential_controller = Credential()
 
 @credential.route("/", methods=["GET"])
 def get_all_credentials():
     try:
-        creds = Credential.get_all_credentials()
+        creds = credential_controller.get_all_credentials()
         return jsonify(creds), 200
     except Exception as err:
         logging.exception("not able to get all credentials with err : {}".format(err.__str__()))
@@ -23,7 +22,7 @@ def create_credential():
 
     try:
         cred = request.get_json()
-        Credential.create_credential(cred)
+        credential_controller.create_credential(cred)
         return jsonify({}), 201
     except ValueError as err:
         logging.exception("failed to create new credential with : {}".format(err.__str__()))
