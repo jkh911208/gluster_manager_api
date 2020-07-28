@@ -3,6 +3,7 @@ import config
 from db.Database import Database
 import paramiko
 from controllers.Credential import Credential
+from util.SSHClient import SSHClient
 
 class Resource(object):
     def __init__(self):
@@ -17,9 +18,6 @@ class Resource(object):
 
     def discover_new_node(self, node: dict) -> bool:
         # check if i have all the data i need
-        # 5f1e4a06c9439c6a5b53649d -> correct
-        # 5f1dfd04e83f7bbc21ea416a -> wrong
-        print(node)
         required_key = ["address", "cred_id"]
         for key in required_key:
             if key not in node:
@@ -28,14 +26,11 @@ class Resource(object):
         # get credential detail from DB
         cred_tool = Credential()
         cred = cred_tool.get_one_credential_with_password(node["cred_id"])
-        print(cred)
 
-        # check if credential is correct
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(node["address"], 22, cred["username"], cred["password"])
+        # initiate ssh connection
+        ssh = SSHClient(node["address"], cred["username"], cred["password"])
 
-        # check if i have the sudo 
+        # check if user have sudo privilege
 
         # check Linux distro
 

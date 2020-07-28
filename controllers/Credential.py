@@ -41,5 +41,7 @@ class Credential(object):
     def get_one_credential_with_password(self, id) -> dict:
         crypto_tool = Crypto()
         credential = self.db.find_by_id(id)
+        if credential is None:
+            raise ValueError("not able to find credential from db")
         credential["password"] = crypto_tool.decrypt(credential["password"])
         return credential
