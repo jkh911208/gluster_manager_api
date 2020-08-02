@@ -21,26 +21,31 @@ class SSHClient(object):
         return True
 
     def change_to_su(self):
-        self.command_with_shell("sudo su")
-        self.command_with_shell(self.password)
+        if not self.am_i_su():
+            self.command_with_shell("sudo su")
+            self.command_with_shell(self.password)
 
-    def am_i_su(self):
+    def am_i_su(self) -> bool:
         result = self.command_with_shell("\x03")
-        if result.endswith("# "):
+        if result[-1].endswith("# "):
             return True
         return False
 
-    def command_with_shell(self, command: str, shell=None) -> str:
+    def command_with_shell(self, command: str, shell=None, byte=False) -> list:
         if shell is None:
             shell = self.shell
         shell.sendall(command + "\n")
         while not shell.recv_ready():
             time.sleep(0.1)
-        time.sleep(0.2)
-        output = shell.recv(9999).decode("utf-8")
+        time.sleep(1)
+        output = shell.recv(99999)
+        if not byte:
+            output = output.decode("utf-8")
+            output = output.replace("\r", "")
+            output = output.split("\n")
         return output
 
-    def command(self, command):
+    def command(self, command: str) -> list:
         shell = self.ssh.invoke_shell()
         output = self.command_with_shell(command, shell)
         shell.close()

@@ -21,3 +21,22 @@ def discover_new_node():
     except Exception as err:
         logging.exception("Not able to discover new node with error : {}".format(err.__str__()))
         return jsonify({"error": err.__str__()}), 500
+
+@resource.route("/", methods=["GET"])
+def get_all_nodes():
+    try:
+        nodes = resource_controller.get_all_nodes()
+        return jsonify(nodes), 200
+    except Exception as err:
+        logging.exception("not able to get all nodes from data with error : {}".format(err.__str__()))
+        return jsonify({"error": err.__str__()}), 500 
+
+@resource.route("/", methods=["DELETE"])
+def delete_one_node():
+    try:
+        node_id = request.get_json()
+        deleted = resource_controller.delete_one_node(node_id)
+        return jsonify({"deleted": True}), 200
+    except Exception as err:
+        logging.exception("not able to get all nodes from data with error : {}".format(err.__str__()))
+        return jsonify({"error": err.__str__()}), 500 

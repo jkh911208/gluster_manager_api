@@ -140,3 +140,16 @@ class Database(object):
         except Exception as err:
             logging.exception("Not able to update _id : {id}, in collection : {collection} with {msg}".format(id=id, collection=self.collection, msg=err.__str__()))
             raise
+
+    def delete(self, id) -> bool:
+        if not isinstance(id, (str, ObjectId)):
+            raise TypeError("id need to be str or ObjectId type")
+
+        if isinstance(id, str):
+            id = ObjectId(id)
+
+        try:
+            return self.collection.delete_one({"_id": id})
+        except Exception as err:
+            logging.exception("Not able to delete _id : {id}, in collection : {collection} with {msg}".format(id=id, collection=self.collection, msg=err.__str__()))
+            raise
