@@ -6,6 +6,3 @@ def config_to_dict(data):
             if len(key_val) == 2:
                 temp[key_val[0].strip().replace("\"", "")] = key_val[1].strip().replace("\"", "")
     return temp
-
-# def yaml_to_dict(data):
-    

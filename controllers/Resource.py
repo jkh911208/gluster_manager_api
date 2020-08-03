@@ -1,10 +1,10 @@
 import logging
 import config
-import json
 from db.Database import Database
 from controllers.Credential import Credential
 from util.SSHClient import SSHClient
 import util.convert_to_dict
+import util.inventory
 
 class Resource(object):
     def __init__(self):
@@ -47,24 +47,8 @@ class Resource(object):
             logging.exception("cannot verify the linux distro : {}".format(distro))
             raise RuntimeError("Only support CentOS 7")
 
-        # check if lshw is installed
-        ssh.change_to_su()
-        which_lshw = ssh.command_with_shell("which lshw")
-        if not which_lshw[1].endswith("/lshw"):
-            logging.warning("installing lshw in node : {}".format(node["address"]))
-            ssh.command_with_shell("sudo install lshw -y")
-        # get all disk in the disk in the node
-        disks = ssh.command_with_shell("lshw -json -class disk", byte=True)
-        disks = disks.decode("utf-8")
-        disks = disks[disks.find("{"):disks.rfind("}")].replace("\r", "").replace("\n", "").replace(" ", "")
-        disk_list = []
-        while True:
-            location = disks.find("},{")
-            if location == -1:
-                disk_list.append(json.loads(disks +"}"))
-                break
-            disk_list.append(json.loads(disks[:location + 1]))
-            disks = disks[location + 2:]
+        # get disk list in dict
+        disk_list = util.inventory.get_disk_list(ssh)
 
         # check if address exist in db
         exist_data = self.db.find({"address": node["address"]})

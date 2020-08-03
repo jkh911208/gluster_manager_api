@@ -11,8 +11,8 @@ def discover_new_node():
     if not request.is_json:
         return jsonify({"error": "only json request is accepted"}), 400
 
+    node = request.get_json()
     try:
-        node = request.get_json()
         resource_controller.discover_new_node(node)
         return jsonify({}), 201
     except paramiko.AuthenticationException as err:
@@ -33,8 +33,11 @@ def get_all_nodes():
 
 @resource.route("/", methods=["DELETE"])
 def delete_one_node():
+    if not request.is_json:
+        return jsonify({"error": "only json request is accepted"}), 400
+
+    node_id = request.get_json()
     try:
-        node_id = request.get_json()
         deleted = resource_controller.delete_one_node(node_id)
         return jsonify({"deleted": True}), 200
     except Exception as err:
